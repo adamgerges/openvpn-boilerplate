@@ -14,7 +14,7 @@ fi
 
 # Ensure jq is installed for JSON parsing
 if ! command -v jq &> /dev/null; then
-    echo "Installing jq for JSON parsing..."
+    echo "jq is not installed."
     read -p "Do you want to install jq? (yes/no): " install_jq
     if [[ $install_jq == "yes" ]]; then
         apt update && apt install -y jq
