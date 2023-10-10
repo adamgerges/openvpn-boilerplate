@@ -15,6 +15,7 @@ To run the script, clone this repository and execute the script:
 ```
 git clone https://github.com/adamgerges/openvpn-boilerplate.git
 cd openvpn-boilerplate
+chmod +x setup.sh
 sudo bash setup.sh
 ```
 
