@@ -9,7 +9,13 @@ fi
 # Ensure jq is installed for JSON parsing
 if ! command -v jq &> /dev/null; then
     echo "Installing jq for JSON parsing..."
-    apt update && apt install -y jq
+    read -p "Do you want to install jq? (yes/no): " install_jq
+    if [[ $install_jq == "yes" ]]; then
+        apt update && apt install -y jq
+    else
+        echo "jq is required for this script to run. Exiting."
+        exit 1
+    fi
 fi
 
 # Obtain the server's public IP address
@@ -31,13 +37,19 @@ read -p "Do you want to install OpenVPN in Docker? (yes/no): " install_in_docker
 if [[ $install_in_docker == "yes" ]]; then
     # Docker installation logic
     if ! command -v docker &> /dev/null; then
-        echo "Docker is not installed. Installing Docker..."
-        apt update
-        apt install -y apt-transport-https ca-certificates curl software-properties-common
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        apt update
-        apt install -y docker-ce
+        echo "Docker is not installed."
+        read -p "Do you want to install Docker? (yes/no): " install_docker
+        if [[ $install_docker == "yes" ]]; then
+            apt update
+            apt install -y apt-transport-https ca-certificates curl software-properties-common
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+            add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+            apt update
+            apt install -y docker-ce
+        else
+            echo "Docker is required for this script to run. Exiting."
+            exit 1
+        fi
     fi
     
     docker pull kylemanna/openvpn
@@ -65,11 +77,16 @@ expect eof
 EOF
     chmod +x automate_openvpn.sh
     wget https://git.io/vpn -O openvpn-install.sh
-    ./automate_openvpn.sh
-    echo "max-clients 10000" >> /etc/openvpn/server/server.conf
-    echo "duplicate-cn" >> /etc/openvpn/server/server.conf
-    sudo systemctl restart openvpn-server@server
-    rm automate_openvpn.sh
+    if [ -f "openvpn-install.sh" ]; then
+        ./automate_openvpn.sh
+        echo "max-clients 10000" >> /etc/openvpn/server/server.conf
+        echo "duplicate-cn" >> /etc/openvpn/server/server.conf
+        sudo systemctl restart openvpn-server@server
+        rm automate_openvpn.sh
+    else
+        echo "Failed to download the OpenVPN installation script. Exiting."
+        exit 1
+    fi
 fi
 
 # Prompt user for .ovpn naming
