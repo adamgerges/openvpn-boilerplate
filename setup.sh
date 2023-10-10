@@ -6,6 +6,12 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+# Ensure curl is installed
+if ! command -v curl &> /dev/null; then
+    echo "Installing curl..."
+    apt update && apt install -y curl
+fi
+
 # Ensure jq is installed for JSON parsing
 if ! command -v jq &> /dev/null; then
     echo "Installing jq for JSON parsing..."
